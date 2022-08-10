@@ -1,16 +1,21 @@
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+//import routes
+const authRoute = require('./routes/auth');
+
+dotenv.config();
 
 //connect to DB
 mongoose.connect(
-    'mongodb+srv://hungtoxic:12345@cluster0.bapfz0t.mongodb.net/?retryWrites=true&w=majority',
-    { useNewUrlParser: true},
+    process.env.DB_CONNECT,
     () => console.log('connected to DB')
 );
 
-//import routes
-const authRoute = require('./routes/auth');
+//middleware
+app.use(express.json());
+
 
 
 //Route middlewares
