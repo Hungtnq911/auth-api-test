@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const {registerValidation,loginValidation} = require('../validation');
 
 
+const maxAge = 1000*60*60*24; //24hours
 
 router.post ('/register', async (req,res)=>{
 
@@ -50,13 +51,23 @@ router.post ('/login',async (req,res)=>{
     //Check if password is correct
     const validPass = await bcrypt.compare(req.body.password,user.password);
     if(!validPass) return res.status(400).send('Password is wrong');
-
-    //Create and assign a token if login success
-    const token = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET);
-    res.header('auth-token',token).send(token);
     
+    //Create and assign a token if login 
+    try{
+        const token = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET);
+        res.cookie('jwt',token,{httpOnly: true, maxAge: maxAge});
+        res.status(200).json({user:user._id});
+    }catch(err){
+        res.status(400).send('can not create token');
+    }
+   
+   
+});
 
-
+router.get('/logout',(req,res)=>{
+    res.cookie('jwt', '',{maxAge: 1});
+    res.send('log out');
+    //res.redirect('/'); go back home
 });
 
 
