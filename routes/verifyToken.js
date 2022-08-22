@@ -1,17 +1,23 @@
 const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
 
-module.exports = function (req, res, next) {
-    const token = req.header('auth-token');
+dotenv.config();
 
-    if(!token) return res.status(401).send('Access Denied');
+const requireAuth = (req,res,next) =>{
 
-    try{
-        const verified = jwt.verify(token, process.env.TOKEN_SECRET);
-        req.user = verified;
-        next();
+    const token = req.cookies.jwt;
 
-    }catch(err){
-        res.status(400).send('Invalid token');
+    if(!token){
+        //res.redirect('api/user/login');
+        res.status(403).send('Access Denied');
     }
-
+    try{
+       const verify = jwt.verify(token, process.env.TOKEN_SECRET);
+        req.user = verify;
+        next();
+    }
+    catch(err){
+        res.status(400).send('Invalid token');;
+    }
 }
+module.exports = {requireAuth};
